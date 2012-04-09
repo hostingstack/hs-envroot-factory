@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby1.9.1
+# -*- mode: ruby -*-
+require File.expand_path('../../lib/boot', __FILE__)
+require 'date'
+require 'tmpdir'
+require 'tempfile'
+require 'template_cache'
+
+$worker_id = 0 # fake worker_id for config
+EnvironmentName = ENV['RAILS_ENV'] || 'production'
+require File.expand_path('../../config/defaults', __FILE__)
+require File.expand_path('../../config/' + EnvironmentName, __FILE__)
+
+opts = {}
+ARGV.each do |name| opts[name.to_sym] = true end
+TemplateCache.rebuild_all_template_archives opts

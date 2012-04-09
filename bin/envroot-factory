@@ -1,0 +1,96 @@
+#!/usr/bin/env ruby1.9.1
+# -*- mode: ruby -*-
+require File.expand_path('../../lib/boot', __FILE__)
+require 'date'
+require 'template_cache'
+
+$worker_id = ARGV.shift.to_i
+if $worker_id == 0
+  puts "Usage: envroot-factory worker_id"
+  puts "       worker_id must be > 0"
+  exit 2
+end
+
+EnvironmentName = ENV['RAILS_ENV'] || 'production'
+require File.expand_path('../../config/defaults', __FILE__)
+require File.expand_path('../../config/' + EnvironmentName, __FILE__)
+
+def initialize_redis
+  Resque.redis = $config[:redis]
+  Resque.redis.namespace = 'HS:%s:resque' % EnvironmentName
+  while true do
+    begin
+      Resque.redis.ping
+      break
+    rescue => e
+      puts "Retrying Redis connection, #{e}"
+      sleep 1
+    end
+  end
+  $redis = Redis::Namespace.new("HS:%s" % EnvironmentName,
+                                :redis => Redis.connect(:url => $config[:redis], :thread_safe => true))
+  $redis.ping
+end
+
+def acquire_build_slot
+  begin
+    puts "Acquiring slot #{$config[:vm_id]}"
+    vm = OpenVZVM.new $config[:vm_id], nil, nil
+    vm.stop
+    vm.destroy
+  rescue
+  end
+end
+
+def ensure_ip_forwarding
+  forwarding_masterswitch = '/proc/sys/net/ipv4/conf/all/forwarding'
+
+  forwarding = File.open(forwarding_masterswitch) do |f|
+    f.readchar
+  end
+
+  if forwarding == '0'
+    File.open(forwarding_masterswitch, 'w') do |f|
+      f.write(1)
+    end
+    puts "Enabled ip_forwarding in #{forwarding_masterswitch} since it was disabled"
+  end
+end
+
+def ensure_template_archives_exist
+  return if TemplateCache.verify_all_template_archives_exist
+  puts "Templates are missing"
+
+  while true
+
+    begin
+    File.open(File.join($config[:template_cache], 'rebuild.lock'), File::CREAT|File::EXCL) do |lock|
+      puts "Building a fresh template"
+      cmd = File.expand_path('../envroot-factory-rebuild-template', __FILE__)
+      begin
+        TemplateCache.rebuild_all_template_archives
+      ensure
+        File.delete(lock)
+      end
+    end
+    rescue Errno::EEXIST => e
+    end
+
+    puts "Waiting for other worker to complete template build"
+    sleep 60
+
+    return if TemplateCache.verify_all_template_archives_exist
+  end
+end
+
+
+ensure_ip_forwarding
+initialize_redis
+ensure_template_archives_exist
+acquire_build_slot
+
+queues = [:envroot_factory]
+worker = Resque::Worker.new(*queues)
+worker.verbose = true
+worker.log "Starting worker #{worker}"
+worker.work(:blocking => true, :interval => 10)

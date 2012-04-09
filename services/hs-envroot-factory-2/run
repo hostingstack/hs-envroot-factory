@@ -1,0 +1,5 @@
+#!/bin/sh
+WORKER_ID=$(basename $PWD | egrep -o '[0-9]+')
+echo starting $WORKER_ID
+exec 2>&1
+exec stdbuf -o0 -e0 /usr/lib/hs/envroot-factory/bin/envroot-factory $WORKER_ID ................................................................................................................................................................

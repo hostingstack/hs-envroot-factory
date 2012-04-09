@@ -1,0 +1,52 @@
+#!/usr/bin/env ruby1.9.1
+# -*- mode: ruby -*-
+require File.expand_path('../../lib/boot', __FILE__)
+require 'date'
+require 'time'
+
+$worker_id = 0 # fake worker_id for config
+require File.expand_path('../../config/defaults', __FILE__)
+EnvironmentName = ENV['RAILS_ENV'] || 'production'
+require File.expand_path('../../config/' + EnvironmentName, __FILE__)
+
+Resque.redis = $config[:redis]
+Resque.redis.namespace = 'HS:%s:resque' % EnvironmentName
+$redis = Redis::Namespace.new("HS:%s" % EnvironmentName,
+                                :redis => Redis.connect(:url => $config[:redis], :thread_safe => true))
+
+puts EnvironmentName
+
+start = Time.now
+
+job_token = UUID.generate(:compact)
+opts = {:job_token => job_token,
+  :app_code_url => ARGV.shift || 'http://localhost:9200/storage/apps/1/code/code-rails3.zip',
+  :facts => {'type' => ARGV.shift || 'ruby19'},
+  :service_config => {"Postgresql"=>{"port"=>5432, "hostname"=>"10.10.10.10", "username"=>"u_test", "password"=>"test", "database"=>"d_test"}},
+  :prev_recipe_hash => ARGV.shift,
+  :dest_env_root_url => ARGV.shift || "http://localhost:9200/storage/apps/1/root/root-#{job_token}"
+}
+job = EnvRootFactory::BuildRootJob.create(opts)
+puts job
+puts opts[:dest_env_root_url]
+
+old_status = nil
+while true do
+  status = Resque::Status.get(job).status
+  if status != old_status then
+    old_status = status
+    puts ">>>>> %s <<<<<" % status
+    if status == "completed" then
+      puts "Total Time: %d" % (Time.now - start)
+      exit 0
+    end
+  end
+  logs = []
+  while true do
+    l = $redis.lpop("log:#{job_token}")
+    break if l.nil?
+    logs << l
+  end
+  puts "%d >%s<" % [Time.now-start, logs.join('')]
+  sleep 1
+end

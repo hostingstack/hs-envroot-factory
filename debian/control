@@ -1,0 +1,12 @@
+Source: hs-envroot-factory
+Section: net
+Priority: extra
+Maintainer: HostingStack Maintainers <maintainers@hostingstack.com>
+Build-Depends: debhelper (>= 7.0.50~), ruby1.9.1-full, ruby1.9.1-dev, hs-runtime-rubygems1.9.1, rubygem1.9-bundler, git
+Standards-Version: 3.9.2
+Origin: HostingStack
+
+Package: hs-envroot-factory
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ruby1.9.1-full, hs-runtime-rubygems1.9.1, rubygem1.9-bundler, linux-image-openvz-amd64, vzctl, debootstrap, make, hs-vz-config, git, pigz
+Description: HostingStack EnvironmentRoot Factory

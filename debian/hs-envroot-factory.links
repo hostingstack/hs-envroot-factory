@@ -1,0 +1,2 @@
+var/lib/hs-envroot-factory/template_cache usr/lib/hs/envroot-factory/template_cache
+etc/hs/envroot-factory/production.rb usr/lib/hs/envroot-factory/config/production.rb

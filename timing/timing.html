@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html><head>
+<meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+<style>
+body {
+  font-family: Helvetica;
+  font-size: 11px;
+}
+body {
+  margin: 0;
+  margin-top: 5px;
+}
+.timeblock {
+  overflow: hidden;
+  border: 2px solid black;
+  color: black;
+  height: 40px;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  text-align: center;
+}
+#timeblocks {
+  height: 50px;
+  font-size: 9px;
+}
+#total {
+  border-top: 2px solid black;
+  padding: 1px;
+  left: 0px;
+  position: absolute;
+}
+#drawingarea {
+  height: 80px;
+}
+</style>
+<script>
+var blockid = 0;
+var data = new Array();
+
+function clearData() {
+  blockid = 0;
+  data = new Array();
+  var el = document.getElementById('timeblocks');
+  while (el.hasChildNodes()) {
+    el.removeChild(el.lastChild);
+  }
+}
+
+function addBlock(desc, duration, color) {
+  data[blockid] = Math.round(duration);
+  var el = document.createElement('div');
+  el.className = "timeblock";
+  el.id = "timeblock" + blockid;
+  el.style.borderColor = color;
+  el.innerHTML = duration + "s<br>" + desc;
+  el.title = desc;
+  blockid++;
+  document.getElementById('timeblocks').appendChild(el);
+}
+
+function doneAdding() {
+  var totaltime = 0;
+  for (var i = 0; i < blockid; i++) {
+    totaltime += data[i];
+  }
+  var totalwidth = window.innerWidth - 20;
+  var onesec = Math.round((totalwidth - (blockid*2)) / totaltime);
+  if (onesec < 3) onesec = 3;
+  var left = 0;
+  var offset = left;
+  for (var i = 0; i < blockid; i++) {
+    var time = data[i];
+    var width = onesec * time;
+    if (width < 10) width = 10;
+    var el = document.getElementById('timeblock' + i);
+    el.style.width = width + 'px';
+    el.style.left = offset + 'px';
+    offset+=width+1;
+  }
+  var el = document.getElementById('total');
+  el.innerHTML = "Total time: " + totaltime + "s";
+  el.style.width = offset - left + 'px';
+}
+
+var filereader = new FileReader();
+filereader.onload = function(evt) {
+  clearData();
+
+  var timingdata = JSON.parse(evt.target.result);
+  var last_section;
+  var color;
+  var last_time = 0;
+  var last_msg = '';
+
+  for ( var i = 0; i < timingdata.length; i++ ) {
+    var val = timingdata[i];
+    var time = val[0];
+    var msg = val[1];
+    if (val[2]) { msg += ' ' + val[2]; }
+    if (last_msg != msg) {
+      if (val[1] != last_section) {
+        color = (color == 'green' ? 'navy' : 'green');
+        last_section = val[1];
+      }
+      addBlock(msg, time-last_time, color);
+      last_time = time;
+    }
+    last_msg = msg;
+  }
+  doneAdding();
+};
+filereader.onerror = function(evt) {
+  alert("Error when reading file: " + filereader.error.code + "  [2=SECURITY_ERR, 5=ENCODING_ERR]");
+};
+
+function loadFile() {
+  if (document.getElementById("file").files.length === 0) { console.log("no file"); return; }
+  var file = document.getElementById("file").files[0];
+  document.getElementById('title').innerHTML = "Timing Chart for \"" +file.name+ "\"";
+  filereader.readAsBinaryString(file);
+}
+
+var timeOut = null;
+var func = function() { doneAdding(); };
+window.onresize = function(){
+  if(timeOut != null) clearTimeout(timeOut);
+  setTimeout(func, 100);
+};
+</script></head>
+<body>
+
+<h1 id="title">Timing Chart</h1>
+
+<input type="file" id="file" name="file" onchange="loadFile()" size=50 />
+<br/><br/>
+
+<div id="drawingarea">
+<div id="timeblocks"></div>
+<div id="total"></div>
+</div>
+
+Copyright 2011 Efficient Cloud Ltd. All Rights reserved.<br/>
+Tested in FF5.
+
+</body>
+</html>
