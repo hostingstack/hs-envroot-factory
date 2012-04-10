@@ -145,7 +145,7 @@ class Recipe::Ruby < Recipe
   def install_ruby
     case facts['runtime'].to_sym
     when :ruby19
-      install_deb ["ruby1.9.1", "efc-runtime-rubygems1.9.1"]
+      install_deb ["ruby1.9.1"]
       # make this ruby the default one
       File.symlink("/usr/bin/ruby1.9.1", "/usr/bin/ruby")
       File.symlink("/usr/bin/irb1.9.1", "/usr/bin/irb")

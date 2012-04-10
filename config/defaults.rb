@@ -17,6 +17,5 @@ $config[:apt_sources] = <<EOSOURCES
 deb http://cdn.debian.net/debian squeeze main non-free contrib
 deb http://cdn.debian.net/debian squeeze-updates main non-free contrib
 deb http://security.debian.org/ squeeze/updates main non-free contrib
-deb http://repository.example.org/ appplatform main
 EOSOURCES
 

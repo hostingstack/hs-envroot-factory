@@ -164,8 +164,6 @@ exec /usr/sbin/sshd
     chroot "useradd -d #{$config[:vm_app_home]} --uid 1000 -s /bin/bash #{$config[:vm_app_user]}"
 
     chroot "apt-get update"
-    chroot "apt-get install -y --allow-unauthenticated hs-keyring"
-    chroot "apt-get update"
     chroot "apt-get install -y --no-install-recommends locales ruby1.9.1 iptables daemontools ifupdown iproute netcat-openbsd telnet procps openssh-server"
   end
 

@@ -4,6 +4,5 @@ $config[:apt_sources_EXAMPLE] = <<EOSOURCES
 deb http://apt-cache.example.org/ftp.at.debian.org/debian squeeze main non-free contrib
 deb http://apt-cache.example.org/ftp.at.debian.org/debian squeeze-updates main non-free contrib
 deb http://apt-cache.example.org/security.debian.org/ squeeze/updates main non-free contrib
-deb http://apt-cache.example.org/repository.example.org/ appplatform main
 EOSOURCES
 
