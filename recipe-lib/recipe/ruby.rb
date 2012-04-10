@@ -158,17 +158,20 @@ class Recipe::Ruby < Recipe
       end
       # for the shells we directly spawn ...
       ENV['PATH'] = '/var/lib/gems/1.9.1/bin:' + ENV['PATH']
-    when :rubyee18
-      install_deb "ruby-enterprise"
+    when :ruby18
+      install_deb "ruby1.8"
       # make this ruby the default one
-      File.symlink("/usr/local/bin/ruby", "/usr/bin/ruby")
-      File.symlink("/usr/local/bin/irb", "/usr/bin/irb")
-      File.symlink("/usr/local/bin/erb", "/usr/bin/erb")
-      File.symlink("/usr/local/bin/gem", "/usr/bin/gem")
-      # clear all the gems REE is shipping, especially rack causes conflicts with older rails versions
-      FileUtils.rm_r("/usr/local/lib/ruby/gems/1.8/")
+      File.symlink("/usr/bin/ruby1.8", "/usr/bin/ruby")
+      File.symlink("/usr/bin/irb1.8", "/usr/bin/irb")
+      File.symlink("/usr/bin/erb1.8", "/usr/bin/erb")
+      File.symlink("/usr/bin/gem1.8", "/usr/bin/gem")
 
-      # gem bins are installed into /usr/local/bin, so no need to fix PATH
+      open("/etc/profile", "a") do |f|
+        f.puts 'PATH=/var/lib/gems/1.8/bin:$PATH'
+        f.puts 'export PATH'
+      end
+      # for the shells we directly spawn ...
+      ENV['PATH'] = '/var/lib/gems/1.8/bin:' + ENV['PATH']
     else
       raise "unsupported App runtime"
     end
@@ -184,8 +187,8 @@ class Recipe::Ruby < Recipe
     case facts['runtime'].to_sym
     when :ruby19
       packages << "ruby1.9.1-dev"
-    when :rubyee18
-      # ruby headers are in main package
+    when :ruby18
+      packages << "ruby1.8-dev"
     else
       raise "unsupported App runtime"
     end

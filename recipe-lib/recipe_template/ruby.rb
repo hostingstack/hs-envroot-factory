@@ -3,8 +3,8 @@ require 'erubis'
 require 'digest/sha1'
 
 class RecipeTemplate::Ruby < RecipeTemplate
-  @supported_types = [:rubyee18, :ruby19, :railsree18, :railsr19]
-  @templates = [:rubyee18, :ruby19]
+  @supported_types = [:ruby18, :ruby18, :ruby19, :railsree18, :railsr19]
+  @templates = [:ruby18, :ruby19]
   @recipe_class = Recipe::Ruby
 
   def self.build_config_vars(service_config)
@@ -36,8 +36,8 @@ class RecipeTemplate::Ruby < RecipeTemplate
     ret
   end
 
-  define_tasks :template_build_rubyee18 do
-    @facts['runtime'] = 'rubyee18'
+  define_tasks :template_build_ruby18 do
+    @facts['runtime'] = 'ruby18'
 
     install_ruby
     install_ruby_dev
@@ -88,7 +88,7 @@ class RecipeTemplate::Ruby < RecipeTemplate
     if [:ruby19, :railsr19].include?(@facts['type'].to_sym)
       @facts['runtime'] = 'ruby19'
     else
-      @facts['runtime'] = 'rubyee18'
+      @facts['runtime'] = 'ruby18'
     end
 
     @facts['app_code'] = $config[:vm_app_code_path]

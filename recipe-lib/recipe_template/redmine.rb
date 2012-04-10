@@ -6,7 +6,7 @@ class RecipeTemplate::Redmine < RecipeTemplate
   @recipe_class = Recipe::Ruby
 
   define_tasks :install do
-    @facts['runtime'] = 'rubyee18'
+    @facts['runtime'] = 'ruby18'
 
     install_ruby
     install_ruby_dev

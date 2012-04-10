@@ -59,7 +59,7 @@ describe "Recipe Generator" do
 
   it "should support all known app types" do
     @app_code = AppCode.new "mocked"
-    recipe = RecipeGenerator.generate({'type' => :rubyee18}, @app_code)
+    recipe = RecipeGenerator.generate({'type' => :ruby18}, @app_code)
     recipe = RecipeGenerator.generate({'type' => :ruby19}, @app_code)
     recipe = RecipeGenerator.generate({'type' => :railsr19}, @app_code)
     recipe = RecipeGenerator.generate({'type' => :railsree18}, @app_code)
