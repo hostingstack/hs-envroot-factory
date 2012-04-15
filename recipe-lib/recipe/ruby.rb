@@ -130,7 +130,7 @@ class Recipe::Ruby < Recipe
     end
 
     tries = opts[:tries] || 15
-    cmd = "gem install --clear-sources --source http://production.cf.rubygems.org #{name}"
+    cmd = "gem install #{name}"
     cmd << " -v #{opts[:version]}" unless opts[:version].nil?
     begin
       run_cmd cmd
