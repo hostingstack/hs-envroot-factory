@@ -16,8 +16,18 @@ class TemplateArchiveBuilder
 
   def build
     Dir.mktmpdir do |workdir|
-      @workdir = workdir
-      build_internal
+      begin
+        @workdir = workdir
+        build_internal
+      ensure
+        # umount all submounts
+        mounts = File.read("/proc/mounts").split("\n").map { |l|
+          l.split[1][0, @workdir.length] == @workdir ? l.split[1] : nil
+        }.compact
+        mounts.each do |path|
+          %x{umount #{path}}
+        end
+      end
     end
   end
 
