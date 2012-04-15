@@ -150,6 +150,7 @@ class Recipe::Ruby < Recipe
       File.symlink("/usr/bin/ruby1.9.1", "/usr/bin/ruby")
       File.symlink("/usr/bin/irb1.9.1", "/usr/bin/irb")
       File.symlink("/usr/bin/erb1.9.1", "/usr/bin/erb")
+      File.unlink("/usr/bin/gem") if File.exists?("/usr/bin/gem")
       File.symlink("/usr/bin/gem1.9.1", "/usr/bin/gem")
 
       open("/etc/profile", "a") do |f|
@@ -159,11 +160,12 @@ class Recipe::Ruby < Recipe
       # for the shells we directly spawn ...
       ENV['PATH'] = '/var/lib/gems/1.9.1/bin:' + ENV['PATH']
     when :ruby18
-      install_deb "ruby1.8"
+      install_deb ["ruby1.8", "rubygems1.8"]
       # make this ruby the default one
       File.symlink("/usr/bin/ruby1.8", "/usr/bin/ruby")
       File.symlink("/usr/bin/irb1.8", "/usr/bin/irb")
       File.symlink("/usr/bin/erb1.8", "/usr/bin/erb")
+      File.unlink("/usr/bin/gem") if File.exists?("/usr/bin/gem")
       File.symlink("/usr/bin/gem1.8", "/usr/bin/gem")
 
       open("/etc/profile", "a") do |f|
